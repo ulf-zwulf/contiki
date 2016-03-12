@@ -5,7 +5,8 @@
 #define LEDS_GREEN                    1
 #define LEDS_YELLOW                   2
 #define LEDS_RED                      4
-#define LEDS_ALL                      7
+#define LEDS_BLUE                     8
+#define LEDS_ALL                     15
 
 void leds_init(void); /* Initialize the LEDs driver. */
 unsigned char leds_get(void); /* Get the status of a LED. */
