@@ -42,9 +42,14 @@
 #include "contiki-net.h"
 #include "leds.h"
 #include "dev/leds.h"
+#include "adc.h"
+#include "i2c.h"
 #include "dev/battery-sensor.h"
+#include "dev/temp-sensor.h"
 #include "dev/temp_mcu-sensor.h"
 #include "dev/light-sensor.h"
+#include "dev/pulse-sensor.h"
+#include "dev/pulse-sensor.h"
 #ifdef CO2
 #include "dev/co2_sa_kxx-sensor.h"
 #endif
@@ -85,14 +90,17 @@ do_report(void)
   
   seq_id++;
   len += snprintf((char *) &out_buf[len], sizeof(out_buf), "&: ");
-  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TXT=6LOWPAN ");
-  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TARGET=avr-rss2 ");
+  //len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TARGET=avr-rss2 ");
+  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TXT=RS-UA-6LPN ");
   len += snprintf((char *) &out_buf[len], sizeof(out_buf), "V_MCU=%-d ", battery_sensor.value(0));
   len += snprintf((char *) &out_buf[len], sizeof(out_buf), "T_MCU=%-d ", temp_mcu_sensor.value(0));
   len += snprintf((char *) &out_buf[len], sizeof(out_buf), "LIGHT=%-d ", light_sensor.value(0));
 #ifdef CO2
-  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "CO2=%-d ", co2_sa_kxx_sensor.value(value));
-#endif
+  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "SA_CO2=%-d ", co2_sa_kxx_sensor.value(CO2_SA_KXX_CO2));
+  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "SA_RH=%-d ", co2_sa_kxx_sensor.value(CO2_SA_KXX_RH));
+  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "SA_T=%-d ", co2_sa_kxx_sensor.value(CO2_SA_KXX_TEMP));
+ #endif
+  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "T=%-5.2f", ((double) temp_sensor.value(0)/100.));
   len += snprintf((char *) &out_buf[len], sizeof(out_buf), "\n\r");
 
   return len;
