@@ -53,7 +53,7 @@
 #include "lib/sensors.h"
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
-//#include "dev/cc2538-sensors.h"
+#include "dev/temp-sensor.h"
 #include <string.h>
 /*---------------------------------------------------------------------------*/
 /*
@@ -163,7 +163,7 @@ typedef struct mqtt_client_config {
 /* Maximum TCP segment size for outgoing segments of our socket */
 #define MAX_TCP_SEGMENT_SIZE    32
 /*---------------------------------------------------------------------------*/
-#define STATUS_LED LEDS_GREEN
+#define STATUS_LED LEDS_YELLOW
 /*---------------------------------------------------------------------------*/
 /*
  * Buffers for Client ID and Topic.
@@ -487,9 +487,8 @@ publish(void)
   remaining -= len;
   buf_ptr += len;
 
-#if 0
-  len = snprintf(buf_ptr, remaining, ",\"On-Chip Temp (mC)\":%d",
-                 cc2538_temp_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
+  len = snprintf(buf_ptr, remaining, ",\"Temp (C)\":%-5.2f",
+		 ((double) temp_sensor.value(0)/100.));
 
   if(len < 0 || len >= remaining) {
     printf("Buffer too short. Have %d, need %d + \\0\n", remaining, len);
@@ -498,6 +497,7 @@ publish(void)
   remaining -= len;
   buf_ptr += len;
 
+#if 0
   len = snprintf(buf_ptr, remaining, ",\"VDD3 (mV)\":%d",
                  vdd3_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
 
@@ -688,6 +688,13 @@ PROCESS_THREAD(mqtt_demo_process, ev, data)
 {
 
   PROCESS_BEGIN();
+
+  SENSORS_ACTIVATE(temp_sensor);
+  leds_init();
+
+  /* The data sink runs with a 100% duty cycle in order to ensure high 
+     packet reception rates. */
+  NETSTACK_MAC.off(1);
 
   printf("MQTT Demo Process\n");
 
