@@ -54,7 +54,12 @@
 #include "dev/button-sensor.h"
 #include "dev/leds.h"
 #include "dev/temp-sensor.h"
+#include "dev/battery-sensor.h"
 #include <string.h>
+#ifdef CO2
+#include "dev/co2_sa_kxx-sensor.h"
+#endif
+
 /*---------------------------------------------------------------------------*/
 /*
  * IBM server: messaging.quickstart.internetofthings.ibmcloud.com
@@ -127,7 +132,7 @@ static uint8_t state;
 #define NO_NET_LED_DURATION         (NET_CONNECT_PERIODIC >> 1)
 /*---------------------------------------------------------------------------*/
 /* Default configuration values */
-#define DEFAULT_TYPE_ID             "cc2538"
+#define DEFAULT_TYPE_ID             "avr-rss2"
 #define DEFAULT_AUTH_TOKEN          "AUTHZ"
 #define DEFAULT_EVENT_TYPE_ID       "status"
 #define DEFAULT_SUBSCRIBE_CMD_TYPE  "+"
@@ -454,11 +459,11 @@ publish(void)
 
   buf_ptr = app_buffer;
 
-#if 0
+#if 1
   len = snprintf(buf_ptr, remaining,
                  "{"
                  "\"d\":{"
-                 "\"myName\":\"%s\","
+                 "\"Name\":\"%s\","
                  "\"Seq #\":%d,"
                  "\"Uptime (sec)\":%lu",
                  BOARD_STRING, seq_nr_value, clock_seconds());
@@ -471,6 +476,18 @@ publish(void)
 
   remaining -= len;
   buf_ptr += len;
+
+  len = snprintf(buf_ptr, remaining, ",\"V_MCU (V)\":%-5.2f",
+		 ((double) battery_sensor.value(0)/1000.));
+
+  if(len < 0 || len >= remaining) {
+    printf("Buffer too short. Have %d, need %d + \\0\n", remaining, len);
+    return;
+  }
+
+  remaining -= len;
+  buf_ptr += len;
+
 
   /* Put our Default route's string representation in a buffer */
   char def_rt_str[64];
@@ -497,24 +514,29 @@ publish(void)
   remaining -= len;
   buf_ptr += len;
 
-#if 0
-  len = snprintf(buf_ptr, remaining, ",\"VDD3 (mV)\":%d",
-                 vdd3_sensor.value(CC2538_SENSORS_VALUE_TYPE_CONVERTED));
+#ifdef CO2
+  len = snprintf(buf_ptr, remaining, ",\"SA_CO2 (ppm)\":%d",
+                 co2_sa_kxx_sensor.value(CO2_SA_KXX_CO2));
 
   if(len < 0 || len >= remaining) {
     printf("Buffer too short. Have %d, need %d + \\0\n", remaining, len);
     return;
   }
+
   remaining -= len;
   buf_ptr += len;
+#endif
 
   len = snprintf(buf_ptr, remaining, "}}");
 
+  remaining -= len;
+  buf_ptr += len;
+
   if(len < 0 || len >= remaining) {
     printf("Buffer too short. Have %d, need %d + \\0\n", remaining, len);
     return;
   }
-#endif
+
 
   mqtt_publish(&conn, NULL, pub_topic, (uint8_t *)app_buffer,
                strlen(app_buffer), MQTT_QOS_LEVEL_0, MQTT_RETAIN_OFF);
@@ -690,11 +712,16 @@ PROCESS_THREAD(mqtt_demo_process, ev, data)
   PROCESS_BEGIN();
 
   SENSORS_ACTIVATE(temp_sensor);
-  leds_init();
+  SENSORS_ACTIVATE(battery_sensor);
+#ifdef CO2
+  SENSORS_ACTIVATE(co2_sa_kxx_sensor);
+#endif
+  leds_init(); 
+
 
   /* The data sink runs with a 100% duty cycle in order to ensure high 
      packet reception rates. */
-  NETSTACK_MAC.off(1);
+  //NETSTACK_MAC.off(1);
 
   printf("MQTT Demo Process\n");
 
