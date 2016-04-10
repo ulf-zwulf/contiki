@@ -1,7 +1,9 @@
 
 CFLAGS += -DPROJECT_CONF_H=\"project-conf.h\"
 
-CFLAGS += -DCO2
+#CFLAGS += -DCO2
+
+APPS += ping6
 
 # We use floating vars. Add library.
 PRINTF_LIB_FLT  = -Wl,-u,vfprintf -lprintf_flt -lm

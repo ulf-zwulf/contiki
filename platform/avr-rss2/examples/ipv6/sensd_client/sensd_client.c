@@ -55,7 +55,7 @@
 #endif
 
 #ifndef PERIOD
-#define PERIOD 10
+#define PERIOD 15
 #endif
 
 #define REPORT_INTERVAL	 (PERIOD * CLOCK_SECOND)
@@ -91,7 +91,9 @@ do_report(void)
   seq_id++;
   len += snprintf((char *) &out_buf[len], sizeof(out_buf), "&: ");
   //len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TARGET=avr-rss2 ");
-  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TXT=KTH-6LPN ");
+  //len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TXT=KTH-6LPN ");
+  //len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TXT=UA-RS-6LPN ");
+  len += snprintf((char *) &out_buf[len], sizeof(out_buf), "TXT=CAP-6LPN ");
   //len += snprintf((char *) &out_buf[len], sizeof(out_buf), "V_MCU=%-d ", battery_sensor.value(0));
   //len += snprintf((char *) &out_buf[len], sizeof(out_buf), "T_MCU=%-d ", temp_mcu_sensor.value(0));
   len += snprintf((char *) &out_buf[len], sizeof(out_buf), "LIGHT=%-d ", light_sensor.value(0));
@@ -157,7 +159,12 @@ PROCESS_THREAD(sensd_client_process, ev, data) {
   set_global_address();
   leds_init();
   print_local_addresses();
-  printf("Starting TCP client on port=%d\n", PORT);
+
+  /* The data sink runs with a 100% duty cycle in order to ensure high 
+     packet reception rates. */
+  NETSTACK_MAC.off(1);
+
+  //printf("Starting TCP client on port=%d\n", PORT);
 
   /* Set server address. typically sensd */
   //uip_ip6addr(&addr, 0xfe80, 0, 0, 0, 0xfec2, 0x3d00, 1, 0x63ae);
