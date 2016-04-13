@@ -59,6 +59,8 @@
 #ifdef CO2
 #include "dev/co2_sa_kxx-sensor.h"
 #endif
+#include "adc.h"
+#include "dev/pulse-sensor.h"
 
 /*---------------------------------------------------------------------------*/
 /*
@@ -514,6 +516,19 @@ publish(void)
   remaining -= len;
   buf_ptr += len;
 
+  //
+  len = snprintf(buf_ptr, remaining, ",\"P0 (V)\":%d",
+		 pulse_sensor.value(0));
+
+  if(len < 0 || len >= remaining) {
+    printf("Buffer too short. Have %d, need %d + \\0\n", remaining, len);
+    return;
+  }
+
+  remaining -= len;
+  buf_ptr += len;
+  //
+
 #ifdef CO2
   len = snprintf(buf_ptr, remaining, ",\"SA_CO2 (ppm)\":%d",
                  co2_sa_kxx_sensor.value(CO2_SA_KXX_CO2));
@@ -717,7 +732,7 @@ PROCESS_THREAD(mqtt_demo_process, ev, data)
   SENSORS_ACTIVATE(co2_sa_kxx_sensor);
 #endif
   leds_init(); 
-
+  SENSORS_ACTIVATE(pulse_sensor);
 
   /* The data sink runs with a 100% duty cycle in order to ensure high 
      packet reception rates. */
