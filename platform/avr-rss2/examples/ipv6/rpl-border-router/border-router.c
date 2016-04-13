@@ -347,7 +347,6 @@ PROCESS_THREAD(border_router_process, ev, data)
  * Prevent that by turning the radio off until we are initialized as a DAG root.
  */
   prefix_set = 0;
-  NETSTACK_MAC.off(0);
 
   PROCESS_PAUSE();
 
@@ -356,13 +355,6 @@ PROCESS_THREAD(border_router_process, ev, data)
   ip64_init();
 
   PRINTF("RPL-Border router started\n");
-#if 0
-   /* The border router runs with a 100% duty cycle in order to ensure high
-     packet reception rates.
-     Note if the MAC RDC is not turned off now, aggressive power management of the
-     cpu will interfere with establishing the SLIP connection */
-  NETSTACK_MAC.off(1);
-#endif
 
   /* Now turn the radio on, but disable radio duty cycling.
    * Since we are the DAG root, reception delays would constrain mesh throughbut.
