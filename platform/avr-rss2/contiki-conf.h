@@ -52,6 +52,17 @@
 #define F_CPU          8000000UL
 #endif
 
+
+// FROM SKY SHOULD BE RADIO files
+/* Delay between GO signal and SFD: radio fixed delay + 4Bytes preample + 1B SFD -- 1Byte time is 32us
+ * ~327us + 129preample = 456 us */
+#define RADIO_DELAY_BEFORE_TX ((unsigned)US_TO_RTIMERTICKS(456))
+/* Delay between GO signal and start listening
+ * ~50us delay + 129preample + ?? = 183 us */
+#define RADIO_DELAY_BEFORE_RX ((unsigned)US_TO_RTIMERTICKS(183))
+/* Delay between the SFD finishes arriving and it is detected in software */
+#define RADIO_DELAY_BEFORE_DETECT 0
+
 #include <stdint.h>
 
 #ifndef NETSTACK_CONF_MAC
