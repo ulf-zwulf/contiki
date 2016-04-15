@@ -258,13 +258,118 @@ uint8_t rf230_last_correlation,rf230_last_rssi,rf230_smallest_rssi;
 static radio_result_t
 get_value(radio_param_t param, radio_value_t *value)
 {
-  return RADIO_RESULT_NOT_SUPPORTED;
+  if(!value) {
+    return RADIO_RESULT_INVALID_VALUE;
+  }
+
+  switch(param) {
+  case RADIO_PARAM_POWER_MODE:
+    // *value = (REG(RFCORE_XREG_RXENABLE) && RFCORE_XREG_RXENABLE_RXENMASK) == 0
+    //? RADIO_POWER_MODE_OFF : RADIO_POWER_MODE_ON;
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_CHANNEL:
+    *value = (radio_value_t)rf230_get_channel();
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_PAN_ID:
+    //*value = get_pan_id();
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_16BIT_ADDR:
+    //*value = get_short_addr();
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_RX_MODE:
+    *value = 0;
+#if 0
+    if(REG(RFCORE_XREG_FRMFILT0) & RFCORE_XREG_FRMFILT0_FRAME_FILTER_EN) {
+      *value |= RADIO_RX_MODE_ADDRESS_FILTER;
+    }
+    if(REG(RFCORE_XREG_FRMCTRL0) & RFCORE_XREG_FRMCTRL0_AUTOACK) {
+      *value |= RADIO_RX_MODE_AUTOACK;
+    }
+#endif
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_TXPOWER:
+    //*value = get_tx_power();
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_CCA_THRESHOLD:
+    //*value = get_cca_threshold();
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_RSSI:
+    *value = rf230_get_raw_rssi();
+    return RADIO_RESULT_OK;
+  case RADIO_CONST_CHANNEL_MIN:
+    //*value = CC2538_RF_CHANNEL_MIN;
+    return RADIO_RESULT_OK;
+  case RADIO_CONST_CHANNEL_MAX:
+    //*value = CC2538_RF_CHANNEL_MAX;
+    return RADIO_RESULT_OK;
+  case RADIO_CONST_TXPOWER_MIN:
+    //*value = OUTPUT_POWER_MIN;
+    return RADIO_RESULT_OK;
+  case RADIO_CONST_TXPOWER_MAX:
+    //*value = OUTPUT_POWER_MAX;
+    return RADIO_RESULT_OK;
+  default:
+    return RADIO_RESULT_NOT_SUPPORTED;
+  }
 }
 /*---------------------------------------------------------------------------*/
 static radio_result_t
 set_value(radio_param_t param, radio_value_t value)
 {
-  return RADIO_RESULT_NOT_SUPPORTED;
+  switch(param) {
+  case RADIO_PARAM_POWER_MODE:
+    if(value == RADIO_POWER_MODE_ON) {
+      on();
+      return RADIO_RESULT_OK;
+    }
+    if(value == RADIO_POWER_MODE_OFF) {
+      off();
+      return RADIO_RESULT_OK;
+    }
+    return RADIO_RESULT_INVALID_VALUE;
+  case RADIO_PARAM_CHANNEL:
+
+#if 0
+    if(value < CC2538_RF_CHANNEL_MIN ||
+       value > CC2538_RF_CHANNEL_MAX) {
+      return RADIO_RESULT_INVALID_VALUE;
+    }
+
+
+    if(set_channel(value) == CC2538_RF_CHANNEL_SET_ERROR) {
+      return RADIO_RESULT_ERROR;
+    }
+#endif
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_PAN_ID:
+    //set_pan_id(value & 0xffff);
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_16BIT_ADDR:
+    //set_short_addr(value & 0xffff);
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_RX_MODE:
+    if(value & ~(RADIO_RX_MODE_ADDRESS_FILTER |
+                 RADIO_RX_MODE_AUTOACK)) {
+      return RADIO_RESULT_INVALID_VALUE;
+    }
+
+    //set_frame_filtering((value & RADIO_RX_MODE_ADDRESS_FILTER) != 0);
+    //set_auto_ack((value & RADIO_RX_MODE_AUTOACK) != 0);
+
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_TXPOWER:
+    if(value < RF230_MIN_TX_POWER || value > RF230_MAX_TX_POWER) { 
+      return RADIO_RESULT_INVALID_VALUE;
+    }
+
+    set_tx_power(value);
+    return RADIO_RESULT_OK;
+  case RADIO_PARAM_CCA_THRESHOLD:
+    //set_cca_threshold(value);
+    return RADIO_RESULT_OK;
+  default:
+    return RADIO_RESULT_NOT_SUPPORTED;
+  }
 }
 /*---------------------------------------------------------------------------*/
 static radio_result_t
