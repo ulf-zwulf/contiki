@@ -61,6 +61,7 @@
 
 #include "dev/leds.h"
 #include "dev/spi.h"
+#include "dev/radio.h"
 #include "rf230bb.h"
 
 #include "net/packetbuf.h"
@@ -251,8 +252,26 @@ static int rf230_send(const void *data, unsigned short len);
 static int rf230_receiving_packet(void);
 static int rf230_pending_packet(void);
 static int rf230_cca(void);
+static rtimer_clock_t get_packet_timestamp(void);
+static volatile uint32_t last_packet_timestamp = 0;
 
 uint8_t rf230_last_correlation,rf230_last_rssi,rf230_smallest_rssi;
+
+/*---------------------------------------------------------------------------*/
+static rtimer_clock_t
+get_packet_timestamp(void)
+{
+  /* Wait for an edge */
+  uint32_t t; // = u32MMAC_GetTime();
+  //while(u32MMAC_GetTime() == t);
+  /* Save SFD timestamp, converted from radio timer to RTIMER */
+  //  last_packet_timestamp = RTIMER_NOW() -
+  //  RADIO_TO_RTIMER((uint32_t)(u32MMAC_GetTime() - (u32MMAC_GetRxTime() - 1)));
+  /* The remaining measured error is typically in range 0..16 usec.
+   * Center it around zero, in the -8..+8 usec range. */
+  last_packet_timestamp -= US_TO_RTIMERTICKS(8);
+  return last_packet_timestamp;
+}
 
 /*---------------------------------------------------------------------------*/
 static radio_result_t
@@ -267,6 +286,10 @@ get_value(radio_param_t param, radio_value_t *value)
     // *value = (REG(RFCORE_XREG_RXENABLE) && RFCORE_XREG_RXENABLE_RXENMASK) == 0
     //? RADIO_POWER_MODE_OFF : RADIO_POWER_MODE_ON;
     return RADIO_RESULT_OK;
+
+  case RADIO_PARAM_TX_MODE:
+    return RADIO_RESULT_OK;
+
   case RADIO_PARAM_CHANNEL:
     *value = (radio_value_t)rf230_get_channel();
     return RADIO_RESULT_OK;
@@ -319,11 +342,11 @@ set_value(radio_param_t param, radio_value_t value)
   switch(param) {
   case RADIO_PARAM_POWER_MODE:
     if(value == RADIO_POWER_MODE_ON) {
-      on();
+      rf230_on();
       return RADIO_RESULT_OK;
     }
     if(value == RADIO_POWER_MODE_OFF) {
-      off();
+      rf230_off();
       return RADIO_RESULT_OK;
     }
     return RADIO_RESULT_INVALID_VALUE;
@@ -341,6 +364,10 @@ set_value(radio_param_t param, radio_value_t value)
     }
 #endif
     return RADIO_RESULT_OK;
+  
+  case RADIO_PARAM_TX_MODE:
+    return RADIO_RESULT_OK;
+
   case RADIO_PARAM_PAN_ID:
     //set_pan_id(value & 0xffff);
     return RADIO_RESULT_OK;
@@ -348,22 +375,24 @@ set_value(radio_param_t param, radio_value_t value)
     //set_short_addr(value & 0xffff);
     return RADIO_RESULT_OK;
   case RADIO_PARAM_RX_MODE:
-    if(value & ~(RADIO_RX_MODE_ADDRESS_FILTER |
-                 RADIO_RX_MODE_AUTOACK)) {
-      return RADIO_RESULT_INVALID_VALUE;
-    }
+
+    //if(value & ~(RADIO_RX_MODE_ADDRESS_FILTER |
+    //             RADIO_RX_MODE_AUTOACK)) {
+    //  return RADIO_RESULT_INVALID_VALUE;
+    // }
 
     //set_frame_filtering((value & RADIO_RX_MODE_ADDRESS_FILTER) != 0);
     //set_auto_ack((value & RADIO_RX_MODE_AUTOACK) != 0);
 
     return RADIO_RESULT_OK;
+
   case RADIO_PARAM_TXPOWER:
-    if(value < RF230_MIN_TX_POWER || value > RF230_MAX_TX_POWER) { 
+    if(value < TX_PWR_MIN || value > TX_PWR_MAX) { 
       return RADIO_RESULT_INVALID_VALUE;
     }
-
     set_tx_power(value);
     return RADIO_RESULT_OK;
+
   case RADIO_PARAM_CCA_THRESHOLD:
     //set_cca_threshold(value);
     return RADIO_RESULT_OK;
@@ -373,14 +402,22 @@ set_value(radio_param_t param, radio_value_t value)
 }
 /*---------------------------------------------------------------------------*/
 static radio_result_t
-get_object(radio_param_t param, void *dest, size_t size)
+set_object(radio_param_t param, void *dest, size_t size)
 {
   return RADIO_RESULT_NOT_SUPPORTED;
 }
 /*---------------------------------------------------------------------------*/
 static radio_result_t
-set_object(radio_param_t param, const void *src, size_t size)
+get_object(radio_param_t param, void *dest, size_t size)
 {
+  if(param == RADIO_PARAM_LAST_PACKET_TIMESTAMP) {
+    if(size != sizeof(rtimer_clock_t) || !dest) {
+      return RADIO_RESULT_INVALID_VALUE;
+    }
+    *(rtimer_clock_t *)dest = get_packet_timestamp();
+
+    return RADIO_RESULT_OK;
+  }
   return RADIO_RESULT_NOT_SUPPORTED;
 }
 /*---------------------------------------------------------------------------*/
