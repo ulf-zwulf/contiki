@@ -42,46 +42,59 @@
  * is used with explicit _SFR_MEM8 in the subregister read/write routines.
  */
 
+/* Transmit Frame Timestamp */
 #define RG_SCTSTRHH (0xFC)  //SCTSTRHH7-0
 #define RG_SCTSTRHL (0xFB)  //SCTSTRHL7-0
 #define RG_SCTSTRLH (0xFA)  //SCTSTRLH7-0
 #define RG_SCTSTRLL (0xF9)  //SCTSTRLL7-0
 
-#define RG_SCOCR1HH (0xF8)  //SCOCR1HH7-0
+/* Output Compare 1 */
+#define RG_SCOCR1HH (0xF8)  //SCOCR1HH7-0  
 #define RG_SCOCR1HL (0xF7)  //SCOCR1HL7-0
 #define RG_SCOCR1LH (0xF6)  //SCOCR1LH7-0
 #define RG_SCOCR1LL (0xF5)  //SCOCR1LL7-0
 
+/* Output Compare 2 */
 #define RG_SCOCR2HH (0xF4)  //SCOCR2HH7-0
 #define RG_SCOCR2HL (0xF3)  //SCOCR2HL7-0
 #define RG_SCOCR2LH (0xF2)  //SCOCR2LH7-0
 #define RG_SCOCR2LL (0xF1)  //SCOCR2LL7-0 
 
+/* Output Compare 3 */
 #define RG_SCOCR3HH (0xF0)  //SCOCR3HH7-0
 #define RG_SCOCR3HL (0xEF)  //SCOCR3HL7-0
 #define RG_SCOCR3LH (0xEE)  //SCOCR3LH7-0
 #define RG_SCOCR3LL (0xED)  //SCOCR3LL7-0
 
+/* Timestamp SFD */
 #define RG_SCTSRHH (0xEC)   //SCTSRHH7-0
 #define RG_SCTSRHL (0xEB)   //SCTSRHL7-0
 #define RG_SCTSRLH (0xEA)   //SCTSRLH7-0
 #define RG_SCTSRLL (0xE9)   //SCTSRLL7-0
 
+/* Beacon Timestamp */
 #define RG_SCBTSRHH (0xE8)  //SCBTSRHH7-0
 #define RG_SCBTSRHL (0xE7)  //SCBTSRHL7-0
 #define RG_SCBTSRLH (0xE6)  //SCBTSRLH7-0
 #define RG_SCBTSRLL (0xE5)  //SCBTSRLL7-0
 
+/* Counter */
 #define RG_SCCNTHH (0xE4)   //SCCNTHH7-0
 #define RG_SCCNTHL (0xE3)   //SCCNTHL7-0
 #define RG_SCCNTLH (0xE2)   //SCCNTLH7-0
 #define RG_SCCNTLL (0xE1)   //SCCNTLL7-0
 
+/* Interrupt Status */
 #define RG_SCIRQS (0xE0)  //Res2 Res1 Res0 IRQSBO IRQSOF IRQSCP3 IRQSCP2 IRQSCP1 page 173
+/* Interrupt Mask */
 #define RG_SCIRQM (0xDF)  //Res2 Res1 Res0 IRQMBO IRQMOF IRQMCP3 IRQMCP2 IRQMCP1 page 174
+/* Counter status */
 #define RG_SCSR   (0xDE)  //Res6 Res5 Res4 Res3 Res2 Res1 Res0 SCBSY 173
+/* Counter Control 1 */
 #define RG_SCCR1  (0xDD)  //Res6 Res5 SCBTSM SCCKDIV2 SCCKDIV1 SCCKDIV0 SCEECLK SCENBO 172
+/* Counter Control 0 */
 #define RG_SCCR0  (0xDC)  //SCRES SCMBTS SCEN SCCKSEL SCTSE SCCMP3 SCCMP2 SCCMP1 171
+/* Counter Compare Source */
 #define RG_SCCSR  (0xDB)  //Res1 Res0 SCCS31 SCCS30 SCCS21 SCCS20 SCCS11 SCCS10 161
 
 #define RG_TRX_STATUS         TRX_STATUS
