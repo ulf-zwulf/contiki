@@ -1,5 +1,5 @@
 #!/bin/bash
-make TARGET=avr-RSS2
+make TARGET=avr-rss2
 
 #S_PROG=avr109
 S_PROG=stk500v2
