@@ -196,16 +196,15 @@ PROCESS_THREAD(test_serial, ev, data)
    unsigned char  ri = 0 ; 
 
    for(;;) {
-     printf("Waiting for EV = %d to be equal to  serial_line_event_message = %d\n",ev, serial_line_event_message);
      PROCESS_YIELD_UNTIL(ev == serial_line_event_message);
-     printf("Serial Line Test Process Polled:  EV = %d\n",ev) ;
 
-// debug prints
+#if 0
      if(ev == serial_line_event_message) {
        printf("received line: %s\n", (char *)data);
      } else {
  	printf("Stil: no serial_line_event_message: received Event Number = %d\n", ev) ;
      }
+#endif
       
      command = (char*)strtok((char*)data, (const char*)delimiter) ;		
 
