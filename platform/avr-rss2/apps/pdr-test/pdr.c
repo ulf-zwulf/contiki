@@ -350,6 +350,14 @@ static void inputPacket(void)
     if (h->channel != channel) return;
     if (h->platform_id == 0 || h->platform_id > PLATFORM_ID_MAX) return;
     
+
+	if (h->sender == node_id) {
+#if DEBUG
+      printf("I:self\n");
+#endif
+      return;
+    }
+
     s = &stats[currentStatsIdx];
     
     /* sender and channel is  "key" */
@@ -357,7 +365,7 @@ static void inputPacket(void)
         findIdx = -1;
         lastIdx = -1;
         for (i=0; i<STAT_SIZE; i++) {
-            if (h->sender == stats[i].node_id && h->channel == stats[i].channel && h->txpower == s->txpower) {
+            if (h->sender == stats[i].node_id && h->channel == stats[i].channel && h->txpower == stats[i].txpower) {
                 findIdx = i;
             }
             if (stats[i].node_id != 0) {

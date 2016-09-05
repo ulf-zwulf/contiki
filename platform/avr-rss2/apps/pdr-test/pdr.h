@@ -2,7 +2,7 @@
 #ifndef PDR_H
 #define PDR_H
 
-#define VERSION  "2.8-2016-09-01\n"
+#define VERSION  "2.6-2016-06-20\n"
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -21,7 +21,7 @@
 // test ID (useful e.g. in case of multiple motes having simultaneous tests)
 #define TEST_ID 0x1
 
-#define STAT_SIZE                   40
+#define STAT_SIZE                   50
 #define TEST_PACKET_SIZE            (6 + 6 * 10)
 #define PACKETS_IN_TEST             100u
 
@@ -35,9 +35,11 @@
 #ifdef CONTIKI_TARGET_AVR_RSS2
 // Approximation for RSS2
 #define PACKET_SEND_INTERVAL        (RTIMER_ARCH_SECOND/128)
+#elif CONTIKI_TARGET_INGA
+#define PACKET_SEND_INTERVAL        (RTIMER_ARCH_SECOND/64)
 #else
 // good for Z1 and sky
-#define PACKET_SEND_INTERVAL        (RTIMER_ARCH_SECOND/200)
+#define PACKET_SEND_INTERVAL        (RTIMER_ARCH_SECOND/64)
 #endif
 
 #ifdef CONTIKI_TARGET_UUNODE
@@ -45,6 +47,9 @@
 #endif
 
 #if CONTIKI_TARGET_Z1 || CONTIKI_TARGET_SKY
+/**********************************/
+/*************** SKY **************/
+/**********************************/
 // Zolertia Z1 or Sky
 
 #define PLATFORM_RADIO_HEADER "cc2420.h"
@@ -54,11 +59,11 @@
 #define radio_get_channel cc2420_get_channel
 #define radio_get_rssi    cc2420_rssi
 
-#define RADIO_POWER_MAX        31
-#define RADIO_POWER_MIN        0
-#define RADIO_POWER_ZERO_DB    31
-#define RADIO_POWER_MINUS7_DB  15
-#define RADIO_POWER_MINUS15_DB 7
+#define RADIO_POWER_MAX        31	//0dBm
+#define RADIO_POWER_MIN        3	//-25dBm
+#define RADIO_POWER_ZERO_DB    31	//0dBm
+#define RADIO_POWER_MINUS7_DB  15	//-7dBm
+#define RADIO_POWER_MINUS15_DB 7	//-15dBm
 
 char *tx_power_list[] = { "MAX", "0", "-7", "-15", "MIN"}; /* dBm */ //FIME
 
@@ -71,6 +76,9 @@ char *tx_power_list[] = { "MAX", "0", "-7", "-15", "MIN"}; /* dBm */ //FIME
 #endif
 
 #elif CONTIKI_TARGET_U108 || CONTIKI_TARGET_U108DEV
+/**********************************/
+/*************** U108 *************/
+/**********************************/
 // U108
 // make OPENOCD_CFG=interface/neodb.cfg OPENOCD="sudo openocd" send.upload TARGET=u108dev
 
@@ -96,6 +104,10 @@ char *tx_power_list[] = { "MAX", "0", "-7", "-15", "MIN"}; /* dBm */ //FIME
 
 #elif CONTIKI_TARGET_AVR_RSS2
 
+/**********************************/
+/************ AVR-RSS2 ************/
+/**********************************/
+
 // To compile:
 // make  TARGET=avr-RSS2
 
@@ -114,19 +126,19 @@ char *tx_power_list[] = { "MAX", "0", "-7", "-15", "MIN"}; /* dBm */ //FIME
 #define radio_get_rssi    rf230_rssi
 
 // see ATmega128RFA1 datasheet page 109
-#define RADIO_POWER_MAX        TX_PWR_3DBM
-#define RADIO_POWER_MIN        TX_PWR_17_2DBM
-#define RADIO_POWER_ZERO_DB    6   // actually 0.5 dBm
-#define RADIO_POWER_MINUS7_DB  12  // actually -6.5 dBm
-#define RADIO_POWER_MINUS15_DB TX_PWR_17_2DBM  // actually -17.5 dBm
+#define RADIO_POWER_MAX        TX_PWR_3DBM      // 3.5dm
+#define RADIO_POWER_MIN        TX_PWR_17_2DBM   // -16.5dbm
+#define RADIO_POWER_ZERO_DB    6                // actually 0.5 dBm
+#define RADIO_POWER_MINUS7_DB  12               // actually -6.5 dBm
+#define RADIO_POWER_MINUS15_DB 14               // actually -11.5 dBm
 
-char *tx_power_list[] = { "3", "0", "-7", "-17", "-17"}; /* dBm */
+char *tx_power_list[] = { "MAX", "0", "-7", "-12", "MIN"}; /* dBm */
 
 /*
- Convert From RSSI to dBm.  See page 70: 
+ Convert From RSSI to dBm.  See page 70:
  http://www.atmel.com/Images/Atmel-8266-MCU_Wireless-ATmega128RFA1_Datasheet.pdf
 
- P[RF] = RSSI_BASE_VAL + 3 • (RSSI - 1) [dBm] 
+ P[RF] = RSSI_BASE_VAL + 3 • (RSSI - 1) [dBm]
 */
 
 #define PLATFORM_TEMP_SENSOR_HEADER "dev/temp-sensor.h"
@@ -146,6 +158,9 @@ char *tx_power_list[] = { "3", "0", "-7", "-17", "-17"}; /* dBm */
 #define RADIO_POWER_MINUS15_DB 0x0
 
 #elif CONTIKI_TARGET_SENSORTAG
+/**********************************/
+/************ SENSORTAG ***********/
+/**********************************/
 // make  TARGET=uunode BOARD=cc26xx
 // make  TARGET=srf06-cc26xx BOARD=sensortag/cc2650
 
@@ -171,9 +186,10 @@ uint8_t get_channel() {
 #define PLATFORM_TEMP_SENSOR_HEADER "tmp-007-sensor.h"
 #define temp_sensor       tmp_007_sensor
 
-
 #elif CONTIKI_TARGET_INGA
-
+/**********************************/
+/************** INGA **************/
+/**********************************/
 #define PLATFORM_RADIO_HEADER "radio/rf230bb/rf230bb.h"
 
 #define radio_set_txpower rf230_set_txpower
@@ -182,17 +198,17 @@ uint8_t get_channel() {
 #define radio_get_channel rf230_get_channel
 #define radio_get_rssi    rf230_rssi
 
-// see ATmega128RFA1 datasheet page 109
-#define RADIO_POWER_MAX        0    // TODO: configure!!!
-#define RADIO_POWER_MIN        0    // TODO: configure!!!
-#define RADIO_POWER_ZERO_DB    6   // actually 0.5 dBm
-#define RADIO_POWER_MINUS7_DB  12  // actually -6.5 dBm
-#define RADIO_POWER_MINUS15_DB TX_PWR_17_2DBM  // actually -17.5 dBm
+/// Taken from http://www.atmel.com/images/Atmel-8351-MCU_Wireless-AT86RF233_Datasheet.pdf
+#define RADIO_POWER_MAX        0x0   	          //   4dbm
+#define RADIO_POWER_MIN        TX_PWR_17_2DBM  	// -17dbm
+#define RADIO_POWER_ZERO_DB    0x7              //   0dbm
+#define RADIO_POWER_MINUS7_DB  0xD              // actually -8
+#define RADIO_POWER_MINUS15_DB 0xE              // actually -12 dBm
 
-char *tx_power_list[] = { "3", "0", "-7", "-17", "-17"}; /* dBm */
+char *tx_power_list[] = { "MAX", "0", "-7", "-15", "MIN"}; /* dBm */
 
-#define PLATFORM_TEMP_SENSOR_HEADER "dev/temp-sensor.h"  // TODO: modify to correct sensor
-
+#define PLATFORM_TEMP_SENSOR_HEADER "dev/temperature-sensor.h"
+#define temp_sensor temperature_sensor
 #else
 #error No support for your platform!
 #endif // CONTIKI_TARGET_xx
@@ -221,12 +237,12 @@ struct stats_info {
     int16_t txtemp;
     uint8_t platform_id;
     uint16_t fine;
-    
+
     uint16_t rssiSum;
     uint16_t lqiSumDiff;
     uint8_t rssiMax;
     uint8_t rssiMin;
-    
+
 #if TRACK_ERRORS
     uint16_t zeroLength; // usually signal errors at radio driver level
     uint16_t tooShort;
@@ -239,7 +255,7 @@ struct stats_info {
     uint16_t total;
     // set by radio driver, not included in the total count
     uint16_t phyCrcErrors;
-    
+
 #if TRACK_ERRORS
     // number of bad nibbles...
     uint16_t numBadNibbles;
@@ -285,11 +301,15 @@ extern bool cc2420_without_send_cca;
 #define PLATFORM_ID  8
 #endif
 #ifdef CONTIKI_TARGET_INGA
-#define PLATFORM_ID  9
+  #if INGA_CONF_REVISION == INGA_V161
+    #define PLATFORM_ID  9
+  #else
+    #define PLATFORM_ID  10
+  #endif
 #endif
-#define PLATFORM_ID_MAX 9
+#define PLATFORM_ID_MAX 10
 
-char *platform_list[] = { "none", "native", "cooja", "avr-rss2", "z1", "sky", "u108", "u108dev", "ti-sensortag", "inga"};
+char *platform_list[] = { "none", "native", "cooja", "avr-rss2", "z1", "sky", "u108", "u108dev", "ti-sensortag", "inga-1.6.1", "inga-1.4"};
 
 /* For TX between platforms */
 
@@ -299,9 +319,8 @@ char *platform_list[] = { "none", "native", "cooja", "avr-rss2", "z1", "sky", "u
 #define TX_POWER_MINUS15_DB 3
 #define TX_POWER_MIN        4
 
-#define COMMAND_TX_FINISHED   "send done"
+#define COMMAND_TX_FINISHED     "send done"
 #define COMMAND_STAT_FINISHED   "end of statistics"
-
 
 #include "pattern.h"
 
