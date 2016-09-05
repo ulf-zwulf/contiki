@@ -475,8 +475,8 @@ main(void)
         leds_off(LEDS_YELLOW);
       }
     }
-    leds_off(LEDS_RED);
-    leds_off(LEDS_YELLOW);
+    //leds_off(LEDS_RED);
+    //leds_off(LEDS_YELLOW);
 
 #if 0
 /* Various entry points for debugging in the AVR Studio simulator.
