@@ -1,11 +1,13 @@
 rss2-test
 =========
-Program to test various HW of the rss2-mote. Typically this is run after
-assembly. Serial bootloader is expcted first next rss2-test can be flashed 
-via the serial bootloader. See separate avrdude command below.
+Program to test various HW functions of the rss2-mote. Typically this is run 
+after assembly. Serial bootloader is expcted first next rss2-test can be 
+flashed via the serial bootloader. See separate avrdude command below.
 
 LED result
 ----------
+After 5 sec.
+
 If test passed: Both yellow and red LED are blinking.
 
 If not passed: No blinking LEDS. 
