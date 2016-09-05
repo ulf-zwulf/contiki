@@ -58,3 +58,5 @@ avrdude -p m256rfr2 -c stk500v2 -P /dev/ttyUSB0 -b 38400 -e -U flash:w:rss2-test
 
 References
 ----------
+https://github.com/herjulf/contiki/tree/mote-test
+https://github.com/herjulf/contiki/tree/mote-test/examples/avr-rss2/mote-test
